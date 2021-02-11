@@ -89,9 +89,10 @@ int main(void) {
 	MX_USART2_UART_Init();
 	/* USER CODE BEGIN 2 */
 	GPIO_PinState SwitchState[2]; // now,last
-	uint16_t LED1_HalfPeriod = 500; // 1Hz
+	uint16_t LED1_frequency = 0.5; // 0.5Hz
 	uint32_t TimeStamp = 0;
 	uint32_t ButtonTimeStamp = 0;
+	uint16_t LED1_HalfPeriod = 1000; // (LED1_frequency * 2);
 	/* USER CODE END 2 */
 
 	/* Infinite loop */
@@ -101,19 +102,35 @@ int main(void) {
 		/* USER CODE END WHILE */
 
 		/* USER CODE BEGIN 3 */
-		if (HAL_GetTick() - ButtonTimeStamp >= 100) {
+		if (HAL_GetTick() - ButtonTimeStamp >= 1000) {
 			SwitchState[0] = HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_10);
 			if (SwitchState[1] == GPIO_PIN_SET
 					&& SwitchState[0] == GPIO_PIN_RESET) {
 				// Change Half Period of LED 1
-				if (LED1_HalfPeriod == 500) {
-					LED1_HalfPeriod = 250;
-				} else {
+//				if (LED1_frequency == 0.5) {
+//					LED1_frequency = 1;
+//				} else if (LED1_frequency == 1) {
+//					LED1_frequency = 2;
+//				} else if (LED1_frequency == 2) {
+//					LED1_frequency = 3;
+//				} else if (LED1_frequency == 3) {
+//					LED1_frequency = 0.5;
+//				} else {
+//					LED1_frequency = 0.5;
+//				}
+				if (LED1_HalfPeriod == 1000) {
 					LED1_HalfPeriod = 500;
+				} else if (LED1_HalfPeriod == 500) {
+					LED1_HalfPeriod = 250;
+				} else if (LED1_HalfPeriod == 250) {
+					LED1_HalfPeriod = 166;
+				} else if (LED1_HalfPeriod == 166) {
+					LED1_HalfPeriod = 1000;
+				} else {
+					LED1_HalfPeriod = 1000;
 				}
 				//
 			}
-
 
 			// Run LED
 			if (HAL_GetTick() - TimeStamp >= LED1_HalfPeriod) {
@@ -218,7 +235,13 @@ static void MX_GPIO_Init(void) {
 	__HAL_RCC_GPIOB_CLK_ENABLE();
 
 	/*Configure GPIO pin Output Level */
-	HAL_GPIO_WritePin(GPIOA, LD2_Pin | GPIO_PIN_9, GPIO_PIN_RESET);
+	HAL_GPIO_WritePin(GPIOA, LD2_Pin | GPIO_PIN_7 | GPIO_PIN_9, GPIO_PIN_RESET);
+
+	/*Configure GPIO pin Output Level */
+	HAL_GPIO_WritePin(GPIOC, GPIO_PIN_7, GPIO_PIN_RESET);
+
+	/*Configure GPIO pin Output Level */
+	HAL_GPIO_WritePin(GPIOB, GPIO_PIN_6, GPIO_PIN_RESET);
 
 	/*Configure GPIO pin : B1_Pin */
 	GPIO_InitStruct.Pin = B1_Pin;
@@ -226,18 +249,38 @@ static void MX_GPIO_Init(void) {
 	GPIO_InitStruct.Pull = GPIO_NOPULL;
 	HAL_GPIO_Init(B1_GPIO_Port, &GPIO_InitStruct);
 
-	/*Configure GPIO pins : LD2_Pin PA9 */
-	GPIO_InitStruct.Pin = LD2_Pin | GPIO_PIN_9;
+	/*Configure GPIO pins : LD2_Pin PA7 PA9 */
+	GPIO_InitStruct.Pin = LD2_Pin | GPIO_PIN_7 | GPIO_PIN_9;
 	GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
 	GPIO_InitStruct.Pull = GPIO_NOPULL;
 	GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
 	HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
+
+	/*Configure GPIO pin : PC7 */
+	GPIO_InitStruct.Pin = GPIO_PIN_7;
+	GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+	GPIO_InitStruct.Pull = GPIO_NOPULL;
+	GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+	HAL_GPIO_Init(GPIOC, &GPIO_InitStruct);
 
 	/*Configure GPIO pin : PA10 */
 	GPIO_InitStruct.Pin = GPIO_PIN_10;
 	GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
 	GPIO_InitStruct.Pull = GPIO_NOPULL;
 	HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
+
+	/*Configure GPIO pins : PB3 PB4 PB5 */
+	GPIO_InitStruct.Pin = GPIO_PIN_3 | GPIO_PIN_4 | GPIO_PIN_5;
+	GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
+	GPIO_InitStruct.Pull = GPIO_NOPULL;
+	HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
+
+	/*Configure GPIO pin : PB6 */
+	GPIO_InitStruct.Pin = GPIO_PIN_6;
+	GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+	GPIO_InitStruct.Pull = GPIO_NOPULL;
+	GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+	HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
 
 }
 
