@@ -89,16 +89,16 @@ int main(void) {
 	MX_USART2_UART_Init();
 	/* USER CODE BEGIN 2 */
 	GPIO_PinState SwitchState[2]; // now,last
-	uint16_t LED1_frequency = 0.5; // 0.5Hz
+	uint16_t LED1_frequency = 1; // 0.5Hz
 	uint32_t TimeStamp = 0;
 	uint32_t ButtonTimeStamp = 0;
-	uint16_t LED1_HalfPeriod = 1000; // (LED1_frequency * 2);
+
 	/* USER CODE END 2 */
 
 	/* Infinite loop */
 	/* USER CODE BEGIN WHILE */
 	while (1) {
-
+		uint16_t LED1_HalfPeriod = 1000 / (LED1_frequency);
 		/* USER CODE END WHILE */
 
 		/* USER CODE BEGIN 3 */
@@ -107,28 +107,18 @@ int main(void) {
 			if (SwitchState[1] == GPIO_PIN_SET
 					&& SwitchState[0] == GPIO_PIN_RESET) {
 				// Change Half Period of LED 1
-//				if (LED1_frequency == 0.5) {
-//					LED1_frequency = 1;
-//				} else if (LED1_frequency == 1) {
-//					LED1_frequency = 2;
-//				} else if (LED1_frequency == 2) {
-//					LED1_frequency = 3;
-//				} else if (LED1_frequency == 3) {
-//					LED1_frequency = 0.5;
-//				} else {
-//					LED1_frequency = 0.5;
-//				}
-				if (LED1_HalfPeriod == 1000) {
-					LED1_HalfPeriod = 500;
-				} else if (LED1_HalfPeriod == 500) {
-					LED1_HalfPeriod = 250;
-				} else if (LED1_HalfPeriod == 250) {
-					LED1_HalfPeriod = 166;
-				} else if (LED1_HalfPeriod == 166) {
-					LED1_HalfPeriod = 1000;
+				if (LED1_frequency == 1) {
+					LED1_frequency = 2;
+				} else if (LED1_frequency == 2) {
+					LED1_frequency = 4;
+				} else if (LED1_frequency == 4) {
+					LED1_frequency = 6;
+				} else if (LED1_frequency == 6) {
+					LED1_frequency = 1;
 				} else {
-					LED1_HalfPeriod = 1000;
+					LED1_frequency = 1;
 				}
+
 				//
 			}
 
