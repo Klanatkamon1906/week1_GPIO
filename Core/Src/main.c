@@ -88,11 +88,14 @@ int main(void) {
 	MX_GPIO_Init();
 	MX_USART2_UART_Init();
 	/* USER CODE BEGIN 2 */
-	GPIO_PinState SwitchState[2]; // now,last
+	GPIO_PinState Switch_1_State[2]; // now,last
+	GPIO_PinState Switch_2_State[2]; // now,last
+	GPIO_PinState Switch_3_State[2]; // now,last
+	GPIO_PinState Switch_4_State[2]; // now,last
 	uint16_t LED1_frequency = 1; // 0.5Hz
+
 	uint32_t TimeStamp = 0;
 	uint32_t ButtonTimeStamp = 0;
-
 	/* USER CODE END 2 */
 
 	/* Infinite loop */
@@ -102,10 +105,14 @@ int main(void) {
 		/* USER CODE END WHILE */
 
 		/* USER CODE BEGIN 3 */
-		if (HAL_GetTick() - ButtonTimeStamp >= 1000) {
-			SwitchState[0] = HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_10);
-			if (SwitchState[1] == GPIO_PIN_SET
-					&& SwitchState[0] == GPIO_PIN_RESET) {
+		if (HAL_GetTick() - ButtonTimeStamp >= 150) {
+			Switch_1_State[0] = HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_10);
+			Switch_2_State[0] = HAL_GPIO_ReadPin(GPIOB, GPIO_PIN_3);
+			Switch_3_State[0] = HAL_GPIO_ReadPin(GPIOB, GPIO_PIN_5);
+			Switch_4_State[0] = HAL_GPIO_ReadPin(GPIOB, GPIO_PIN_4);
+			// switch1 control
+			if (Switch_1_State[1] == GPIO_PIN_SET
+					&& Switch_1_State[0] == GPIO_PIN_RESET) {
 				// Change Half Period of LED 1
 				if (LED1_frequency == 1) {
 					LED1_frequency = 2;
@@ -118,10 +125,19 @@ int main(void) {
 				} else {
 					LED1_frequency = 1;
 				}
-
-				//
 			}
-
+			//switch2 control
+			if (Switch_2_State[1] == GPIO_PIN_SET
+					&& Switch_2_State[0] == GPIO_PIN_RESET) {
+				// Change LED 2
+				if (HAL_GPIO_ReadPin(GPIOC, GPIO_PIN_7) == GPIO_PIN_RESET) {
+					HAL_GPIO_WritePin(GPIOC, GPIO_PIN_7, GPIO_PIN_SET);
+				} else {
+					HAL_GPIO_WritePin(GPIOC, GPIO_PIN_7, GPIO_PIN_RESET);
+				}
+			}
+			//switch3 control
+			//switch4 control
 			// Run LED
 			if (HAL_GetTick() - TimeStamp >= LED1_HalfPeriod) {
 				TimeStamp = HAL_GetTick();
@@ -131,7 +147,8 @@ int main(void) {
 					HAL_GPIO_WritePin(GPIOA, GPIO_PIN_9, GPIO_PIN_SET);
 				}
 			}
-			SwitchState[1] == SwitchState[0];
+			Switch_1_State[1] == Switch_1_State[0];
+			Switch_2_State[1] == Switch_2_State[0];
 		}
 
 	}
