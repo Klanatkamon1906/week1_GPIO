@@ -104,9 +104,13 @@ int main(void) {
 	uint16_t LED3_Time_1 = 1500;
 	uint16_t LED3_Time_2 = 500;
 	uint16_t LED3_ON = LED3_Time_2;
-	uint16_t LED3_OFF = LED3_Time_2;
+	uint16_t LED3_OFF = LED3_Time_1;
 
 	GPIO_PinState Switch_4_State[2]; // now,last
+	uint32_t LED4_TimeStamp = 0;
+	uint16_t LED4_FullBilnk = 1;
+	uint16_t LED4_TimeON = 0;
+	uint16_t LED4_PWM = 0;
 
 	//--------------------------------------------------------------------------------------------------
 	/* USER CODE END 2 */
@@ -115,9 +119,6 @@ int main(void) {
 	/* USER CODE BEGIN WHILE */
 	while (1) {
 		uint16_t LED1_HalfPeriod = 1000 / (LED1_frequency);
-		/* USER CODE END WHILE */
-
-		/* USER CODE BEGIN 3 */
 		if (HAL_GetTick() - ButtonTimeStamp >= 150) {
 			// switch1 control
 			Switch_1_State[0] = HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_10);
@@ -139,73 +140,107 @@ int main(void) {
 					break;
 				}
 			}
-			Switch_1_State[1] == Switch_1_State[0];
+			Switch_1_State[1] = Switch_1_State[0];
 
 			//switch2 control
 			Switch_2_State[0] = HAL_GPIO_ReadPin(GPIOB, GPIO_PIN_3);
 			if (Switch_2_State[1] == GPIO_PIN_SET
 					&& Switch_2_State[0] == GPIO_PIN_RESET) {
 				// Change LED 2
-				Button2_Pressed = 1;
-			}
-			Switch_2_State[1] == Switch_2_State[0];
-
-			//switch3 control
-			Switch_3_State[0] = HAL_GPIO_ReadPin(GPIOB, GPIO_PIN_5);
-			if (Switch_3_State[1] == GPIO_PIN_SET
-					&& Switch_3_State[0] == GPIO_PIN_RESET) {
-				// Change LED 3
-//				if (LED3_Mode == 0) {
-//					LED3_Mode = 1;
-//				} else {
-//					LED3_Mode = 0;
-//				}
-
-			}
-			//switch4 control
-			Switch_4_State[0] = HAL_GPIO_ReadPin(GPIOB, GPIO_PIN_4);
-		}
-			// Run LED
-			if (HAL_GetTick() - LED1_TimeStamp >= LED1_HalfPeriod) {
-				LED1_TimeStamp = HAL_GetTick();
-				if (HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_9) == GPIO_PIN_SET) {
-					HAL_GPIO_WritePin(GPIOA, GPIO_PIN_9, GPIO_PIN_RESET);
-				} else {
-					HAL_GPIO_WritePin(GPIOA, GPIO_PIN_9, GPIO_PIN_SET);
-				}
-			}
-
-			if (Button2_Pressed == 1) {
 				if (HAL_GPIO_ReadPin(GPIOC, GPIO_PIN_7) == GPIO_PIN_SET) {
 					HAL_GPIO_WritePin(GPIOC, GPIO_PIN_7, GPIO_PIN_RESET);
 				} else {
 					HAL_GPIO_WritePin(GPIOC, GPIO_PIN_7, GPIO_PIN_SET);
 				}
 			}
-			Button2_Pressed = 0;
+			Switch_2_State[1] = Switch_2_State[0];
 
-			if (LED3_Mode == 1) {
-				if (HAL_GetTick() - LED3_TimeStamp >= LED3_Time_2) {
-					LED3_TimeStamp = HAL_GetTick();
-					HAL_GPIO_WritePin(GPIOB, GPIO_PIN_6, GPIO_PIN_SET);
+			//switch3 control
+			Switch_3_State[0] = HAL_GPIO_ReadPin(GPIOB, GPIO_PIN_5);
+			if (Switch_3_State[1] == GPIO_PIN_SET
+					&& Switch_3_State[0] == GPIO_PIN_RESET) {
+				// Change LED 3
+				if (LED3_Mode == 0) {
+					LED3_ON = LED3_Time_1;
+					LED3_OFF = LED3_Time_2;
+					LED3_Mode = 1;
+				} else {
+					LED3_ON = LED3_Time_2;
+					LED3_OFF = LED3_Time_1;
+					LED3_Mode = 0;
 				}
-				if (HAL_GetTick() - LED3_TimeStamp >= LED3_Time_1) {
-					LED3_TimeStamp = HAL_GetTick();
-					HAL_GPIO_WritePin(GPIOB, GPIO_PIN_6, GPIO_PIN_RESET);
-				}
-			} else {
-				if (HAL_GetTick() - LED3_TimeStamp >= LED3_Time_1) {
-					LED3_TimeStamp = HAL_GetTick();
-					HAL_GPIO_WritePin(GPIOB, GPIO_PIN_6, GPIO_PIN_SET);
-				}
-				if (HAL_GetTick() - LED3_TimeStamp >= LED3_Time_2) {
-					LED3_TimeStamp = HAL_GetTick();
-					HAL_GPIO_WritePin(GPIOB, GPIO_PIN_6, GPIO_PIN_RESET);
-				}
+
 			}
+			Switch_3_State[1] = Switch_3_State[0];
 
-			Switch_3_State[1] == Switch_3_State[0];
+			//switch4 control
+			Switch_4_State[0] = HAL_GPIO_ReadPin(GPIOB, GPIO_PIN_4);
+			if (Switch_4_State[1] == GPIO_PIN_SET
+					&& Switch_4_State[0] == GPIO_PIN_RESET) {
+				// Change LED 4
+				switch (LED4_PWM) {
+				case (0):
+					LED4_TimeON = LED4_FullBilnk * 0;
+					LED4_PWM = 25;
+				case (25):
+					LED4_TimeON = LED4_FullBilnk * 25;
+					LED4_PWM = 50;
+				case (50):
+					LED4_TimeON = LED4_FullBilnk * 50;
+					LED4_PWM = 75;
+				case (75):
+					LED4_TimeON = LED4_FullBilnk * 75;
+					LED4_PWM = 100;
+				default:
+					LED4_TimeON = LED4_FullBilnk;
+					LED4_PWM = 0;
+				}
+
+			}
+			Switch_4_State[1] = Switch_4_State[0];
+		}
+		// Run LED
+		if (HAL_GetTick() - LED1_TimeStamp >= LED1_HalfPeriod) {
+			LED1_TimeStamp = HAL_GetTick();
+			if (HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_9) == GPIO_PIN_SET) {
+				HAL_GPIO_WritePin(GPIOA, GPIO_PIN_9, GPIO_PIN_RESET);
+			} else {
+				HAL_GPIO_WritePin(GPIOA, GPIO_PIN_9, GPIO_PIN_SET);
+			}
+		}
+
+		if ((HAL_GPIO_ReadPin(GPIOB, GPIO_PIN_6) == GPIO_PIN_RESET)) {
+			if (HAL_GetTick() - LED3_TimeStamp >= LED3_ON) {
+				LED3_TimeStamp = HAL_GetTick();
+				HAL_GPIO_WritePin(GPIOB, GPIO_PIN_6, GPIO_PIN_SET);
+			}
+		}
+		if ((HAL_GPIO_ReadPin(GPIOB, GPIO_PIN_6) == GPIO_PIN_SET)) {
+			if (HAL_GetTick() - LED3_TimeStamp >= LED3_OFF) {
+				LED3_TimeStamp = HAL_GetTick();
+				HAL_GPIO_WritePin(GPIOB, GPIO_PIN_6, GPIO_PIN_RESET);
+			}
+		}
+
+		if ((HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_7) == GPIO_PIN_RESET)) {
+			if (HAL_GetTick() - LED4_TimeStamp
+					>= LED4_TimeON) {
+				LED4_TimeStamp = HAL_GetTick();
+				HAL_GPIO_WritePin(GPIOA, GPIO_PIN_7, GPIO_PIN_SET);
+			}
+		}
+		if ((HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_7) == GPIO_PIN_SET)) {
+			if (HAL_GetTick() - LED4_TimeStamp >= (LED4_FullBilnk - LED4_TimeON)) {
+				LED4_TimeStamp = HAL_GetTick();
+				HAL_GPIO_WritePin(GPIOA, GPIO_PIN_7, GPIO_PIN_RESET);
+			}
+		}
 	}
+
+	/* USER CODE END WHILE */
+
+	/* USER CODE BEGIN 3 */
+
 	/* USER CODE END 3 */
 }
 
